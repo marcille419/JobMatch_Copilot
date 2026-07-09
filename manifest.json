@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "AI Job Match",
+  "description": "读取当前 JD，并用本地保存的简历文本生成 AI 岗位匹配分析。",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "AI 岗位匹配",
+    "default_popup": "src/popup.html"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.zhipin.com/*"
+      ],
+      "js": [
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

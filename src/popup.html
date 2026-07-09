@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI 岗位匹配设置</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div>
+          <h1>AI 岗位匹配设置</h1>
+          <p>配置一次后，分析会显示在当前 JD 旁边</p>
+        </div>
+        <span id="statusBadge" class="badge">就绪</span>
+      </header>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h2>模型配置</h2>
+          <span>API Key 仅保存在本地</span>
+        </div>
+        <label>
+          供应商
+          <select id="provider">
+            <option value="deepseek">DeepSeek</option>
+            <option value="qwen">通义千问</option>
+            <option value="openai">OpenAI</option>
+            <option value="custom">自定义</option>
+          </select>
+        </label>
+        <label>
+          API Key
+          <input id="apiKey" type="password" autocomplete="off" placeholder="粘贴你的 API Key">
+        </label>
+        <div class="grid-2">
+          <label>
+            baseURL
+            <input id="baseURL" type="url" spellcheck="false">
+          </label>
+          <label>
+            模型名
+            <input id="model" type="text" spellcheck="false">
+          </label>
+        </div>
+        <button id="saveConfigBtn" class="secondary" type="button">保存配置</button>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <h2>简历</h2>
+          <span id="resumeMeta">未保存</span>
+        </div>
+        <label>
+          上传 PDF 简历
+          <input id="resumePdf" type="file" accept="application/pdf,.pdf">
+        </label>
+        <textarea id="resumeText" rows="10" placeholder="也可以直接粘贴简历文本。上传 PDF 后会自动提取文本并填入这里。"></textarea>
+        <div class="button-row">
+          <button id="saveResumeBtn" class="secondary" type="button">保存简历</button>
+          <button id="clearResumeBtn" class="danger" type="button">清空简历</button>
+        </div>
+      </section>
+
+      <section class="notice" aria-live="polite">
+        保存后回到招聘页，JD 旁边会自动展示轻量匹配分析；点击“详细分析”才会生成优势、不足、学习建议和沟通话术。
+      </section>
+
+      <button id="refreshPageBtn" class="primary" type="button">刷新当前页面分析卡片</button>
+
+      <section id="errorPanel" class="error hidden" role="alert"></section>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

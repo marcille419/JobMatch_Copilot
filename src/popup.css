@@ -1,0 +1,284 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-soft: #edf7f6;
+  --text: #17202a;
+  --muted: #637083;
+  --border: #d9e1ea;
+  --primary: #067a73;
+  --primary-strong: #035e58;
+  --danger: #b42318;
+  --danger-bg: #fff0ee;
+  --focus: #1f9fd1;
+  --shadow: 0 10px 30px rgba(14, 31, 53, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 760px;
+  min-height: 620px;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(31, 159, 209, 0.26);
+  outline-offset: 2px;
+}
+
+.app {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 15px;
+}
+
+h3 {
+  font-size: 14px;
+}
+
+.header p,
+.panel-title span,
+.notice,
+label,
+small {
+  color: var(--muted);
+}
+
+.badge {
+  min-width: 64px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--primary-strong);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.panel,
+.notice,
+.error {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+}
+
+input,
+select {
+  min-height: 40px;
+  padding: 8px 10px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+  max-height: 280px;
+  padding: 10px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 10px;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+}
+
+.primary {
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+.primary:hover {
+  background: var(--primary-strong);
+}
+
+.secondary {
+  border: 1px solid var(--border);
+  background: #f7fafc;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.secondary:hover {
+  border-color: #b7c6d8;
+  background: #eef4f8;
+}
+
+.danger {
+  border: 1px solid #ffd0ca;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.text-button {
+  min-height: 32px;
+  padding: 4px 10px;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.notice {
+  padding: 10px 12px;
+  background: #fffaf0;
+  border-color: #f6d38a;
+}
+
+.error {
+  padding: 10px 12px;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-color: #ffd0ca;
+  white-space: pre-wrap;
+}
+
+.hidden {
+  display: none;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.score {
+  min-width: 92px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--primary-strong);
+  text-align: center;
+  font-weight: 800;
+}
+
+.score span {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.result-section {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+li + li {
+  margin-top: 4px;
+}
+
+.message {
+  padding: 10px;
+  border-radius: 6px;
+  background: #f7fafc;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 780px) {
+  body {
+    width: 100vw;
+  }
+
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
