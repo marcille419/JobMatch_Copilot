@@ -1,54 +1,90 @@
 # AI Job Match Copilot
 
-Chrome/Edge Manifest V3 插件，用于在招聘页面当前 JD 旁边直接展示 AI 岗位匹配结果。
+AI Job Match Copilot 是一个 Chrome/Edge Manifest V3 浏览器插件，用于在招聘页面中读取当前 JD，并结合用户本地保存的简历文本生成岗位匹配分析。
+
+当前版本主要适配 BOSS 直聘 `www.zhipin.com` 的岗位详情页。
 
 ## 功能
 
-- 优先适配 BOSS 直聘 `www.zhipin.com` 当前岗位详情页。
-- 页面内自动展示轻量分析卡片：匹配分数、简短判断、是否值得详细了解。
-- 点击页面内“详细分析”后，再生成优势、不足、补充学习建议和求职沟通话术。
-- 弹窗只作为设置页：配置 AI API、上传或粘贴简历。
-- 支持上传 PDF 简历，本地解析成文本后长期保存到 `chrome.storage.local`。
-- 支持 DeepSeek、通义千问、OpenAI、自定义 OpenAI-compatible 接口。
+- 在当前 JD 页面上显示轻量匹配卡片，不改变招聘网站原始布局。
+- 默认只展示匹配分数、简短判断和是否值得继续了解。
+- 点击“详细分析”后再生成优势、不足、补充学习建议和求职沟通话术。
+- 弹窗只用于配置模型 API 和管理简历。
+- 支持粘贴简历文本，或上传 PDF 简历并在本地提取文本。
+- 简历文本、API Key 和模型配置保存在浏览器本地 `chrome.storage.local`。
+- 支持 DeepSeek、通义千问、OpenAI，以及自定义 OpenAI-compatible Chat Completions 接口。
 
-## 加载方式
+## 安装
 
-1. 打开 Chrome 或 Edge 扩展管理页面。
-2. 开启“开发者模式”。
-3. 点击“加载已解压的扩展”。
-4. 选择本目录：`E:\personproject\JobMatch_Copilot`。
+当前项目尚未发布到扩展商店，需要以未打包扩展方式加载。
 
-## 使用流程
+1. 下载或克隆本仓库。
+2. 打开 Chrome 或 Edge 的扩展管理页面。
+3. 开启“开发者模式”。
+4. 点击“加载已解压的扩展”。
+5. 选择本仓库根目录，也就是包含 `manifest.json` 的目录。
 
-1. 打开扩展弹窗。
-2. 填写并保存模型配置。
+## 使用
+
+1. 点击浏览器工具栏中的扩展图标。
+2. 选择 AI 服务商，填写自己的 API Key、`baseURL` 和模型名。
 3. 上传 PDF 简历，或粘贴文本简历并保存。
 4. 打开 BOSS 直聘岗位详情页。
-5. 插件会在当前 JD 旁边展示轻量匹配分析。
+5. 页面右侧会出现 AI 匹配悬浮卡片。
 6. 对岗位感兴趣时，点击“详细分析”查看完整建议。
 
-## 默认模型
+## 模型配置
 
-模型名和 `baseURL` 都可以在插件中编辑。当前默认值：
+插件通过 OpenAI-compatible Chat Completions 协议调用模型。内置供应商选项只是为了快速填充常见 `baseURL` 和模型名，所有字段都可以手动修改。
 
-- DeepSeek：`https://api.deepseek.com`，`deepseek-v4-flash`
-- 通义千问：`https://dashscope.aliyuncs.com/compatible-mode/v1`，`qwen-plus`
-- OpenAI：`https://api.openai.com/v1`，`gpt-5.4-mini`
-
-如果厂商更新模型名，直接在插件里修改模型名并保存即可。
+如果某个厂商调整模型名称、停用旧模型或变更接口地址，请直接在扩展设置中修改 `baseURL` 和模型名。
 
 ## PDF 支持
 
-PDF 文本提取使用本地打包的 `pdfjs-dist`，文件位于 `vendor/pdfjs/`，许可证见 `vendor/pdfjs/LICENSE`。
+PDF 文本提取使用本地打包的 `pdfjs-dist`，相关文件位于 `vendor/pdfjs/`，许可证见 `vendor/pdfjs/LICENSE`。
 
-注意：扫描件或图片型 PDF 可能无法提取文本，需要用户粘贴文本版简历。
+扫描件或图片型 PDF 通常无法提取有效文本。遇到这种情况时，请粘贴文本版简历。
 
-## 隐私边界
+## 隐私说明
 
-- API Key、模型配置和简历文本只保存到浏览器本地。
-- 插件不提供后端，不云端保存简历或分析结果。
-- 页面内轻量分析和详细分析都会把当前 JD 与本地简历发送给用户选择的 AI 服务商。
+- 插件不提供后端服务。
+- 插件不会把 API Key、简历或分析结果上传到本项目维护者的服务器。
+- API Key、模型配置和简历文本只保存在用户本机浏览器的 `chrome.storage.local`。
+- 执行轻量分析或详细分析时，当前 JD 和简历文本会发送给用户自己配置的 AI 服务商。
+- 请不要在不信任的模型服务商中使用敏感简历信息。
 
-## 注意
+## 权限说明
 
-`manifest.json` 使用了 `<all_urls>` host permission，用于读取当前招聘页和调用用户自定义 AI 接口。若后续准备上架应用商店，应把权限拆成更严格的站点权限和可选接口权限，并补充隐私政策。
+`manifest.json` 当前使用：
+
+- `storage`：保存 API 配置和简历文本。
+- `activeTab` / `scripting`：在当前招聘页面读取 JD。
+- `<all_urls>` host permission：支持读取当前招聘页面，并允许用户配置自定义 AI 接口地址。
+
+如果后续准备发布到 Chrome Web Store 或 Edge Add-ons，建议将 `<all_urls>` 拆成更严格的站点权限和可选接口权限，并补充正式隐私政策。
+
+## 已知限制
+
+- 当前主要适配 BOSS 直聘页面结构，其他招聘网站暂未做精细适配。
+- 不支持自动投递、自动沟通招聘者或批量岗位分析。
+- 不支持多份简历档案，只保存一份当前简历。
+- PDF 解析只支持可复制文本的 PDF，不包含 OCR。
+- AI 输出质量取决于用户选择的模型、简历文本质量和 JD 页面内容完整度。
+
+## 开发
+
+本项目不需要构建步骤，源码即插件文件。
+
+```text
+manifest.json
+src/
+  background.js
+  content.js
+  popup.css
+  popup.html
+  popup.js
+vendor/
+  pdfjs/
+```
+
+修改代码后，在浏览器扩展管理页面点击“重新加载”即可测试。
