@@ -1,12 +1,13 @@
 const CARD_ID = "jobmatch-copilot-card";
 const STYLE_ID = "jobmatch-copilot-style";
-const STORAGE_KEYS = ["provider", "apiKey", "baseURL", "model", "resumeText"];
+const STORAGE_KEYS = ["extensionEnabled", "provider", "apiKey", "baseURL", "model", "resumeText"];
 
 let lastJobHash = "";
 let currentJob = null;
 let debounceTimer = null;
 let activeRequestId = 0;
 let isCollapsed = false;
+let extensionEnabled = true;
 
 function normalizeJobText(text) {
   return String(text || "")
@@ -301,7 +302,20 @@ function ensureCard() {
   return card;
 }
 
+function removeCard() {
+  activeRequestId += 1;
+  const card = document.getElementById(CARD_ID);
+  if (card) {
+    card.remove();
+  }
+}
+
 function renderCard(state) {
+  if (!extensionEnabled) {
+    removeCard();
+    return;
+  }
+
   const card = ensureCard();
   const score = Number.isFinite(state.matchScore) ? state.matchScore : "--";
   const scoreSuffix = Number.isFinite(state.matchScore) ? "/100" : "";
@@ -416,6 +430,9 @@ function buildConfig(stored) {
 }
 
 function validateReady(stored) {
+  if (stored.extensionEnabled === false) {
+    return "插件已暂停，请在扩展弹窗中启用后再分析。";
+  }
   if (!stored.apiKey || !stored.baseURL || !stored.model) {
     return "请先打开扩展填写并保存模型配置。";
   }
@@ -514,6 +531,11 @@ async function runDetailedAnalysis() {
 }
 
 function refreshCurrentJob() {
+  if (!extensionEnabled) {
+    removeCard();
+    return;
+  }
+
   const job = extractCurrentJobDescription();
   if (!job || !job.text || job.text.length < 120) {
     return;
@@ -532,6 +554,11 @@ function refreshCurrentJob() {
 }
 
 function scheduleRefresh() {
+  if (!extensionEnabled) {
+    removeCard();
+    return;
+  }
+
   window.clearTimeout(debounceTimer);
   debounceTimer = window.setTimeout(refreshCurrentJob, 900);
 }
@@ -554,10 +581,38 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
+  if (message && message.type === "DISABLE_INLINE_MATCH") {
+    extensionEnabled = false;
+    removeCard();
+    sendResponse({ ok: true });
+    return true;
+  }
+
   return false;
 });
 
-refreshCurrentJob();
+chrome.storage.local.get(["extensionEnabled"], (stored) => {
+  extensionEnabled = stored.extensionEnabled !== false;
+  if (extensionEnabled) {
+    refreshCurrentJob();
+  } else {
+    removeCard();
+  }
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== "local" || !changes.extensionEnabled) {
+    return;
+  }
+
+  extensionEnabled = changes.extensionEnabled.newValue !== false;
+  if (extensionEnabled) {
+    scheduleRefresh();
+  } else {
+    window.clearTimeout(debounceTimer);
+    removeCard();
+  }
+});
 
 const observer = new MutationObserver(scheduleRefresh);
 observer.observe(document.body, {

@@ -22,6 +22,7 @@ const PROVIDER_DEFAULTS = {
 };
 
 const STORAGE_KEYS = [
+  "extensionEnabled",
   "provider",
   "apiKey",
   "baseURL",
@@ -33,6 +34,9 @@ const STORAGE_KEYS = [
 
 const els = {
   statusBadge: document.getElementById("statusBadge"),
+  extensionEnabled: document.getElementById("extensionEnabled"),
+  enabledHint: document.getElementById("enabledHint"),
+  enabledText: document.getElementById("enabledText"),
   provider: document.getElementById("provider"),
   apiKey: document.getElementById("apiKey"),
   baseURL: document.getElementById("baseURL"),
@@ -71,6 +75,16 @@ function setBusy(isBusy) {
   ].forEach((element) => {
     element.disabled = isBusy;
   });
+  els.refreshPageBtn.disabled = isBusy || !els.extensionEnabled.checked;
+}
+
+function updateEnabledUI(enabled) {
+  els.extensionEnabled.checked = enabled;
+  els.enabledText.textContent = enabled ? "已启用" : "已暂停";
+  els.enabledHint.textContent = enabled
+    ? "启用后会在招聘页面自动显示匹配卡片"
+    : "暂停后不会自动分析，也不会显示页面卡片";
+  els.refreshPageBtn.disabled = !enabled;
 }
 
 function storageGet(keys) {
@@ -129,9 +143,11 @@ function applyProviderDefaults(provider) {
 
 async function loadInitialState() {
   const stored = await storageGet(STORAGE_KEYS);
+  const enabled = stored.extensionEnabled !== false;
   const provider = stored.provider || "deepseek";
   const defaults = PROVIDER_DEFAULTS[provider] || PROVIDER_DEFAULTS.deepseek;
 
+  updateEnabledUI(enabled);
   els.provider.value = provider;
   els.apiKey.value = stored.apiKey || "";
   els.baseURL.value = stored.baseURL || defaults.baseURL;
@@ -139,6 +155,22 @@ async function loadInitialState() {
   els.resumeText.value = stored.resumeText || "";
 
   updateResumeMeta(stored.resumeFileName, stored.resumeSavedAt);
+}
+
+async function setExtensionEnabled(enabled) {
+  clearError();
+  await storageSet({ extensionEnabled: enabled });
+  updateEnabledUI(enabled);
+  setStatus(enabled ? "已启用" : "已暂停");
+
+  try {
+    const tab = await getActiveTab();
+    await chrome.tabs.sendMessage(tab.id, {
+      type: enabled ? "REFRESH_INLINE_MATCH" : "DISABLE_INLINE_MATCH"
+    });
+  } catch (_error) {
+    // 当前标签页没有内容脚本时，仅保存状态即可。
+  }
 }
 
 async function saveConfig() {
@@ -245,6 +277,11 @@ async function getActiveTab() {
 
 async function refreshPageCard() {
   clearError();
+  if (!els.extensionEnabled.checked) {
+    showError("插件已暂停，请先启用后再刷新页面分析卡片。");
+    setStatus("已暂停");
+    return;
+  }
   setStatus("刷新中");
   try {
     const tab = await getActiveTab();
@@ -258,6 +295,10 @@ async function refreshPageCard() {
 
 els.provider.addEventListener("change", () => {
   applyProviderDefaults(els.provider.value);
+});
+
+els.extensionEnabled.addEventListener("change", () => {
+  setExtensionEnabled(els.extensionEnabled.checked).catch((error) => showError(error.message || String(error)));
 });
 
 els.saveConfigBtn.addEventListener("click", () => {

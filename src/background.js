@@ -147,6 +147,14 @@ function shouldRetryWithAlternateTokenParam(error) {
   return message.includes("max_tokens") || message.includes("max_completion_tokens");
 }
 
+function updateActionState(enabled) {
+  chrome.action.setBadgeText({ text: enabled ? "" : "OFF" });
+  chrome.action.setBadgeBackgroundColor({ color: "#637083" });
+  chrome.action.setTitle({
+    title: enabled ? "AI 岗位匹配" : "AI 岗位匹配（已暂停）"
+  });
+}
+
 async function callChatCompletions(config, jdText, resumeText, analysisType, useResponseFormat, tokenParam) {
   const url = buildChatCompletionsURL(config.baseURL);
   const body = {
@@ -195,6 +203,11 @@ async function callChatCompletions(config, jdText, resumeText, analysisType, use
 }
 
 async function analyzeJob(payload) {
+  const stored = await chrome.storage.local.get(["extensionEnabled"]);
+  if (stored.extensionEnabled === false) {
+    throw new Error("插件已暂停，请在扩展弹窗中启用后再分析。");
+  }
+
   const config = payload.config || {};
   const jdText = String(payload.jdText || "").trim();
   const resumeText = String(payload.resumeText || "").trim();
@@ -259,7 +272,12 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 });
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.get(["provider", "baseURL", "model"], (stored) => {
+  chrome.storage.local.get(["extensionEnabled", "provider", "baseURL", "model"], (stored) => {
+    if (stored.extensionEnabled === undefined) {
+      chrome.storage.local.set({ extensionEnabled: true });
+    }
+    updateActionState(stored.extensionEnabled !== false);
+
     if (!stored.provider && !stored.baseURL && !stored.model) {
       chrome.storage.local.set({
         provider: "deepseek",
@@ -268,4 +286,20 @@ chrome.runtime.onInstalled.addListener(() => {
       });
     }
   });
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  chrome.storage.local.get(["extensionEnabled"], (stored) => {
+    updateActionState(stored.extensionEnabled !== false);
+  });
+});
+
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === "local" && changes.extensionEnabled) {
+    updateActionState(changes.extensionEnabled.newValue !== false);
+  }
+});
+
+chrome.storage.local.get(["extensionEnabled"], (stored) => {
+  updateActionState(stored.extensionEnabled !== false);
 });
